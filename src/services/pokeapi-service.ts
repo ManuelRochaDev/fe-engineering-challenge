@@ -1,7 +1,15 @@
 import type { PokemonApiResponse } from "../interfaces/Pokemon";
 import type { PokemonDetails } from "../interfaces/PokemonDetails";
 
+const pokemonDetailsCache = new Map<string, PokemonDetails>();
+
 export const getPokemonByName = (name: string): Promise<PokemonDetails> => {
+  //check if there is cache
+  const cached = pokemonDetailsCache.get(name);
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+
   return fetch(`https://pokeapi.co/api/v2/pokemon/${name}`)
     .then((response) => {
       if (!response.ok) {
@@ -10,6 +18,11 @@ export const getPokemonByName = (name: string): Promise<PokemonDetails> => {
         );
       }
       return response.json();
+    })
+    .then((data: PokemonDetails) => {
+      //store in cache
+      pokemonDetailsCache.set(name, data);
+      return data;
     })
     .catch((error) => {
       console.error(error);

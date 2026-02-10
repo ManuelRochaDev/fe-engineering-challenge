@@ -25,7 +25,7 @@ export const useFetchPokemonDetails = ({
         let names: string[];
 
         //if pokemonNames is provided use it, otherwise fetch the list
-        if (pokemonNames && pokemonNames.length > 0) {
+        if (pokemonNames) {
           names = pokemonNames;
         } else {
           const data = await getPokemons(limit, offset);
