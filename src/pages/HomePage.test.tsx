@@ -1,11 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
-import HomePage from "./HomePage";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { usePokedex } from "../contexts/PokedexContext";
 import * as useFetchPokemonDetailsModule from "../hooks/useFetchPokemonDetails";
 import * as useFilteredPokemonListModule from "../hooks/useFilteredPokemonList";
-import { usePokedex } from "../contexts/PokedexContext";
+import type { PokemonWithDetails } from "../interfaces/PokemonWithDetails";
+import HomePage from "./HomePage";
 
 vi.mock("../hooks/useFetchPokemonDetails");
 vi.mock("../hooks/useFilteredPokemonList");
@@ -37,7 +39,7 @@ describe("HomePage", () => {
         stats: [],
       },
     },
-  ] as any;
+  ] as PokemonWithDetails[];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -48,8 +50,6 @@ describe("HomePage", () => {
     ).mockReturnValue({
       pokemonWithDetails: mockPokemonWithDetails,
       isLoading: false,
-      isOffline: false,
-      totalCount: 100,
     });
 
     vi.spyOn(
@@ -63,7 +63,10 @@ describe("HomePage", () => {
         sortOrder: "asc",
       },
       setFilters: vi.fn(),
-      filteredPokemons: mockPokemonWithDetails,
+      paginatedPokemons: mockPokemonWithDetails,
+      allPokemons: mockPokemonWithDetails,
+      totalPages: 5,
+      isLoading: false,
     });
 
     vi.mocked(usePokedex).mockReturnValue({
@@ -71,10 +74,10 @@ describe("HomePage", () => {
       removePokemon: vi.fn(),
       isPokemonInPokedex: vi.fn().mockReturnValue(false),
       pokedex: [],
-      getPokemonData: vi.fn(),
+      getPokemon: vi.fn(),
       exportPokedexToCSV: vi.fn(),
       sharePokemon: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof usePokedex>);
   });
 
   it("renders without crashing", () => {

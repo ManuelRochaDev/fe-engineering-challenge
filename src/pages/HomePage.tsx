@@ -1,35 +1,54 @@
-import { Progress } from "../components/Progress";
-import { FilterSort } from "../components/FilterSort";
-import { Loading } from "../components/Loading";
-import { useFetchPokemonDetails } from "../hooks/useFetchPokemonDetails";
-import { useFilteredPokemonList } from "../hooks/useFilteredPokemonList";
-import { usePokedex } from "../contexts/PokedexContext";
-import { useState } from "react";
-import { PokemonGrid } from "../components/views/Grid";
-import { PokemonTable } from "../components/views/Table/Table";
-import { Pagination } from "../components/Pagination";
-import { ViewModeToggle } from "../components/views/ViewModeToggle";
+import { useMemo, useState } from "react";
+
 import { BulkActions } from "../components/BulkActions";
 import { EmptyState } from "../components/EmptyState";
+import { FilterSort } from "../components/FilterSort";
+import { Loading } from "../components/Loading";
+import { Pagination } from "../components/Pagination";
+import { PokedexProgress } from "../components/PokedexProgress";
+import { Grid } from "../components/views/Grid";
+import { PokemonTable } from "../components/views/Table/Table";
+import { ViewModeToggle } from "../components/views/ViewModeToggle";
+import { usePokedex } from "../contexts/PokedexContext";
+import { useFilteredPokemonList } from "../hooks/useFilteredPokemonList";
+import type { FilterOptions } from "../interfaces/FilterOptions";
 
 const HomePage = () => {
   const [page, setPage] = useState(1);
   const limit = 20;
-  const { pokemonWithDetails, isLoading, totalCount } = useFetchPokemonDetails({
+  const {
+    filters,
+    setFilters,
+    paginatedPokemons,
+    totalPages,
+    isLoading,
+  } = useFilteredPokemonList({
     limit,
-    offset: (page - 1) * limit,
+    page,
   });
-  const { filters, setFilters, filteredPokemons } = useFilteredPokemonList({
-    pokemonWithDetails,
-  });
-  console.log(filteredPokemons);
   const { addPokemon, removePokemon, isPokemonInPokedex } = usePokedex();
   const [selectedPokemon, setSelectedPokemon] = useState<Set<string>>(
     new Set(),
   );
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
 
-  const totalPages = Math.ceil(totalCount / limit);
+  const hasPokemons = paginatedPokemons.length > 0;
+
+  const paginationProps = useMemo(
+    () => ({
+      currentPage: page,
+      isLoading: isLoading,
+      onPageChange: setPage,
+      totalPages: totalPages,
+    }),
+    [page, totalPages, isLoading],
+  );
+
+  //reset page when filters change
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
 
   const toggleSelection = (name: string) => {
     setSelectedPokemon((prev) => {
@@ -63,15 +82,10 @@ const HomePage = () => {
 
   return (
     <div className="container mx-auto">
-      <Progress />
-      <FilterSort filters={filters} onFilterChange={setFilters} />
+      <PokedexProgress />
+      <FilterSort filters={filters} onFilterChange={handleFilterChange} />
       <div className="flex flex-col items-center sm:flex-row sm:relative sm:justify-center sm:items-center gap-4 mb-4">
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          isLoading={isLoading}
-        />
+        <Pagination {...paginationProps} />
         <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
       </div>
       <BulkActions
@@ -81,20 +95,20 @@ const HomePage = () => {
         onClear={() => setSelectedPokemon(new Set())}
       />
 
-      {!isLoading && filteredPokemons.length === 0 && (
+      {!isLoading && !hasPokemons && (
         <EmptyState message="No Pokémon found" />
       )}
-      {!isLoading && filteredPokemons.length > 0 && (
+      {!isLoading && hasPokemons && (
         <>
           {viewMode === "grid" ? (
-            <PokemonGrid
-              pokemons={filteredPokemons}
+            <Grid
+              pokemons={paginatedPokemons}
               selectedPokemon={selectedPokemon}
               onToggleSelect={toggleSelection}
             />
           ) : (
             <PokemonTable
-              pokemons={filteredPokemons}
+              pokemons={paginatedPokemons}
               showCheckbox
               selectedPokemon={selectedPokemon}
               onToggleSelect={toggleSelection}
@@ -102,14 +116,9 @@ const HomePage = () => {
           )}
         </>
       )}
-      {!isLoading && totalCount > 0 && (
+      {!isLoading && hasPokemons && (
         <div className="flex justify-center items-center gap-4 mt-8 mb-4">
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            isLoading={isLoading}
-          />
+          <Pagination {...paginationProps} />
         </div>
       )}
       {isLoading && (

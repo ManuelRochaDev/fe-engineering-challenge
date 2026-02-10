@@ -1,25 +1,22 @@
-import { Progress } from "../components/Progress";
-import { usePokedex } from "../contexts/PokedexContext";
-import { Loading } from "../components/Loading";
-import { useFetchPokemonDetails } from "../hooks/useFetchPokemonDetails";
-import { FilterSort } from "../components/FilterSort";
-import { useFilteredPokemonList } from "../hooks/useFilteredPokemonList";
-import { usePagination } from "../hooks/usePagination";
-import { useState } from "react";
-import { exportPokedexToCSV } from "../utils/export-csv";
-import { PokemonGrid } from "../components/views/Grid";
-import { PokemonTable } from "../components/views/Table/Table";
-import { Pagination } from "../components/Pagination";
-import { ViewModeToggle } from "../components/views/ViewModeToggle";
+import { useMemo, useState } from "react";
+
 import { BulkActions } from "../components/BulkActions";
 import { EmptyState } from "../components/EmptyState";
+import { FilterSort } from "../components/FilterSort";
+import { Loading } from "../components/Loading";
+import { Pagination } from "../components/Pagination";
+import { PokedexProgress } from "../components/PokedexProgress";
+import { Grid } from "../components/views/Grid";
+import { PokemonTable } from "../components/views/Table/Table";
+import { ViewModeToggle } from "../components/views/ViewModeToggle";
+import { usePokedex } from "../contexts/PokedexContext";
+import { useFilteredPokemonList } from "../hooks/useFilteredPokemonList";
+import type { FilterOptions } from "../interfaces/FilterOptions";
+import { exportPokedexToCSV } from "../utils/export-csv";
 
 const Pokedex = () => {
   const { pokedex, removePokemon } = usePokedex();
-  const pokemonNames = pokedex.map((entry) => entry.name);
-  const { pokemonWithDetails, isLoading } = useFetchPokemonDetails({
-    pokemonNames,
-  });
+  const pokemonNames = useMemo(() => pokedex.map((entry) => entry.name), [pokedex]);
   const [selectedPokemon, setSelectedPokemon] = useState<Set<string>>(
     new Set(),
   );
@@ -27,14 +24,17 @@ const Pokedex = () => {
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  const { filters, setFilters, filteredPokemons } = useFilteredPokemonList({
-    pokemonWithDetails,
-  });
-
-  const { paginatedItems: paginatedPokemons, totalPages } = usePagination({
-    items: filteredPokemons,
-    page,
+  const {
+    filters,
+    setFilters,
+    paginatedPokemons,
+    allPokemons,
+    totalPages,
+    isLoading,
+  } = useFilteredPokemonList({
     limit,
+    page,
+    pokemonNames,
   });
 
   const toggleSelection = (name: string) => {
@@ -54,25 +54,35 @@ const Pokedex = () => {
     setSelectedPokemon(new Set());
   };
 
-  const handleExportCSV = () => {
-    exportPokedexToCSV(pokedex, pokemonWithDetails);
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    setPage(1);
   };
+
+  const handleExportCSV = () => {
+    exportPokedexToCSV(pokedex, allPokemons);
+  };
+
+  const paginationProps = useMemo(
+    () => ({
+      currentPage: page,
+      isLoading: isLoading,
+      onPageChange: setPage,
+      totalPages: totalPages,
+    }),
+    [page, totalPages, isLoading],
+  );
 
   return (
     <>
-      <Progress />
+      <PokedexProgress />
       <FilterSort
         filters={filters}
-        onFilterChange={setFilters}
+        onFilterChange={handleFilterChange}
         onExport={pokedex.length > 0 ? handleExportCSV : undefined}
       />
       <div className="flex flex-col items-center sm:flex-row sm:relative sm:justify-center sm:items-center gap-4 mb-4">
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          isLoading={isLoading}
-        />
+        <Pagination {...paginationProps} />
         <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
       </div>
       <BulkActions
@@ -84,10 +94,10 @@ const Pokedex = () => {
       {!isLoading && pokedex.length === 0 && (
         <EmptyState message="No Pokémon caught yet!" />
       )}
-      {!isLoading && pokedex.length > 0 && pokemonWithDetails.length > 0 && (
+      {!isLoading && pokedex.length > 0 && allPokemons.length > 0 && (
         <>
           {viewMode === "grid" ? (
-            <PokemonGrid
+            <Grid
               pokemons={paginatedPokemons}
               selectedPokemon={selectedPokemon}
               onToggleSelect={toggleSelection}
@@ -102,12 +112,7 @@ const Pokedex = () => {
           )}
           {totalPages > 0 && (
             <div className="flex justify-center items-center gap-4 mt-8 mb-4">
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-                isLoading={isLoading}
-              />
+              <Pagination {...paginationProps} />
             </div>
           )}
         </>

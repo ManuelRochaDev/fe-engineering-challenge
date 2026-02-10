@@ -1,7 +1,8 @@
-import { TypeEnum } from "../constants/type";
-import { Button } from "./Button";
 import { useState } from "react";
+
+import { TypeEnum } from "../constants/type";
 import type { FilterOptions } from "../interfaces/FilterOptions";
+import { Button } from "./Button";
 
 interface FilterSortProps {
   filters: FilterOptions;
@@ -28,15 +29,15 @@ const FilterSort: React.FC<FilterSortProps> = ({ filters, onFilterChange, onExpo
         className="w-full flex items-center justify-between font-semibold text-lg mb-4 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span>Filters</span>
+        <span>Filter Pokémons</span>
         <span className="text-xl">{isExpanded ? "▲" : "▼"}</span>
       </button>
 
       <div className={isExpanded ? "block" : "hidden"}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* search by name */}
+        {/* search */}
         <div>
-          <label htmlFor="searchName" className="block text-sm font-semibold mb-2">Search by Name</label>
+          <label htmlFor="searchName" className="block text-sm font-semibold mb-2">Name</label>
           <input
             id="searchName"
             type="text"
@@ -47,9 +48,9 @@ const FilterSort: React.FC<FilterSortProps> = ({ filters, onFilterChange, onExpo
           />
         </div>
 
-        {/* filter by type */}
+        {/* sort by type */}
         <div>
-          <label htmlFor="filterType" className="block text-sm font-semibold mb-2">Filter by Type</label>
+          <label htmlFor="filterType" className="block text-sm font-semibold mb-2">Type</label>
           <select
             id="filterType"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -74,7 +75,7 @@ const FilterSort: React.FC<FilterSortProps> = ({ filters, onFilterChange, onExpo
             onChange={(e) => handleFilterChange("sortBy", e.target.value)}
             value={filters.sortBy}
           >
-            <option value="none">Default</option>
+            <option value="none">None</option>
             <option value="name">Name</option>
             <option value="height">Height</option>
             <option value="timestamp">Caught Date</option>
@@ -99,7 +100,7 @@ const FilterSort: React.FC<FilterSortProps> = ({ filters, onFilterChange, onExpo
       {onExport && (
         <div className="mt-4 flex justify-end">
           <Button variant="primary" onClick={onExport}>
-            Export CSV
+            Export Pokédex
           </Button>
         </div>
       )}

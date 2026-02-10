@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router";
+
 import type { PokemonDetails } from "../../../interfaces/PokemonDetails";
 import type { PokedexEntry } from "../../../services/pokedex-service";
+import { sharePokemon } from "../../../utils/share-pokemon";
 import { Button } from "../../Button";
 import { CatchButton } from "../../CatchButton";
-import { sharePokemon } from "../../../utils/share-pokemon";
 import { TypeTag } from "../../TypeTag";
 
 interface PokemonTableRowProps {

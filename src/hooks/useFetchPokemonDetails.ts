@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { getPokemonByName, getPokemons } from "../services/pokeapi-service";
+
 import type { PokemonWithDetails } from "../interfaces/PokemonWithDetails";
+import { getPokemonByName, getPokemons } from "../services/pokeapi-service";
 
 interface UseFetchPokemonDetailsProps {
   pokemonNames?: string[];
@@ -15,17 +16,13 @@ export const useFetchPokemonDetails = ({
 }: UseFetchPokemonDetailsProps = {}) => {
   const [pokemonWithDetails, setPokemonWithDetails] = useState<PokemonWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      setIsOffline(false);
 
       try {
         let names: string[];
-        let fetchedTotalCount = 0;
 
         //if pokemonNames is provided use it, otherwise fetch the list
         if (pokemonNames && pokemonNames.length > 0) {
@@ -33,26 +30,32 @@ export const useFetchPokemonDetails = ({
         } else {
           const data = await getPokemons(limit, offset);
           names = data.results.map((p) => p.name);
-          fetchedTotalCount = data.count;
         }
 
-        const detailsPromises = names.map(async (name) => {
-          try {
-            const details = await getPokemonByName(name);
-            return { pokemon: { name }, details };
-          } catch {
-            // Keep pokemon with null details for offline mode
-            return { pokemon: { name }, details: null };
-          }
-        });
+        //batching
+        const batchSize = 50;
+        const results: typeof pokemonWithDetails = [];
         
-        const results = await Promise.all(detailsPromises);
+        for (let i = 0; i < names.length; i += batchSize) {
+          const batch = names.slice(i, i + batchSize);
+          const batchPromises = batch.map(async (name) => {
+            try {
+              const details = await getPokemonByName(name);
+              return { details, pokemon: { name } };
+            } catch (error) {
+              console.error(`Failed to fetch details for ${name}:`, error);
+              //use null details for offline mode
+              return { details: null, pokemon: { name } };
+            }
+          });
+          
+          const batchResults = await Promise.all(batchPromises);
+          results.push(...batchResults);
+        }
 
         setPokemonWithDetails(results);
-        setTotalCount(fetchedTotalCount);
       } catch (error) {
         console.error("Failed to fetch pokemon data: ", error);
-        setIsOffline(true);
         setPokemonWithDetails([]);
       } finally {
         setIsLoading(false);
@@ -60,7 +63,8 @@ export const useFetchPokemonDetails = ({
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pokemonNames?.join(","), limit, offset]);
 
-  return { pokemonWithDetails, isLoading, totalCount, isOffline };
+  return { isLoading, pokemonWithDetails };
 };

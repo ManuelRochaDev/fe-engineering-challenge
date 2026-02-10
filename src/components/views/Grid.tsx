@@ -1,13 +1,13 @@
 import type { PokemonWithDetails } from "../../interfaces/PokemonWithDetails";
-import { PokemonCard } from "./Card/Card";
+import { Card } from "./Card/Card";
 
-interface PokemonGridProps {
+interface GridProps {
   pokemons: PokemonWithDetails[];
   selectedPokemon?: Set<string>;
   onToggleSelect?: (name: string) => void;
 }
 
-const PokemonGrid: React.FC<PokemonGridProps> = ({
+const Grid: React.FC<GridProps> = ({
   pokemons,
   selectedPokemon,
   onToggleSelect,
@@ -15,18 +15,15 @@ const PokemonGrid: React.FC<PokemonGridProps> = ({
   return (
     <div className="flex flex-wrap gap-4 justify-center">
       {pokemons.map((pokemonWithDetails) => (
-        <PokemonCard
+        <Card
           key={pokemonWithDetails.pokemon.name}
           pokemonWithDetails={pokemonWithDetails}
           isSelected={selectedPokemon?.has(pokemonWithDetails.pokemon.name)}
-          onToggleSelect={
-            onToggleSelect &&
-            (() => onToggleSelect(pokemonWithDetails.pokemon.name))
-          }
+          onToggleSelect={onToggleSelect}
         />
       ))}
     </div>
   );
 };
 
-export { PokemonGrid };
+export { Grid };

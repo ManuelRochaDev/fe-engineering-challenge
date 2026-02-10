@@ -21,7 +21,9 @@ export const sharePokemon = async (
       await navigator.share({ text });
       return;
     }
-  } catch {}
+  } catch {
+    //fail if user cancels share dialog
+  }
 
   await navigator.clipboard?.writeText(text);
 };

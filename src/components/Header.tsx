@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router";
+
 import { Button } from "./Button";
 
-const Header: React.FC<{}> = () => {
+const Header: React.FC = () => {
   const navigate = useNavigate();
 
   return (

@@ -1,35 +1,37 @@
-import type { PokemonWithDetails } from "../../../interfaces/PokemonWithDetails";
-import { getEmojiForType } from "../../../utils/type-emoji-mapper";
-import { StatBar } from "../../StatBar";
+import { memo } from "react";
 import { useNavigate } from "react-router";
-import { CatchButton } from "../../CatchButton";
-import { usePokedex } from "../../../contexts/PokedexContext";
-import { timestampToDate } from "../../../utils/timestamp-to-date";
-import { getStatDisplayName } from "../../../utils/stat-mapper";
-import { Button } from "../../Button";
-import { sharePokemon } from "../../../utils/share-pokemon";
-import { PokemonCardOffline } from "./CardOffline";
 
-interface PokemonCardProps {
+import { usePokedex } from "../../../contexts/PokedexContext";
+import type { PokemonWithDetails } from "../../../interfaces/PokemonWithDetails";
+import { sharePokemon } from "../../../utils/share-pokemon";
+import { getStatDisplayName } from "../../../utils/stat-mapper";
+import { timestampToDate } from "../../../utils/timestamp-to-date";
+import { getEmojiForType } from "../../../utils/type-emoji-mapper";
+import { Button } from "../../Button";
+import { CatchButton } from "../../CatchButton";
+import { StatBar } from "../../StatBar";
+import { CardOffline } from "./CardOffline";
+
+interface CardProps {
   pokemonWithDetails: PokemonWithDetails;
   isSelected?: boolean;
-  onToggleSelect?: () => void;
+  onToggleSelect?: (name: string) => void;
 }
 
-const PokemonCard: React.FC<PokemonCardProps> = ({
+const Card: React.FC<CardProps> = memo(({
   pokemonWithDetails,
   isSelected = false,
   onToggleSelect,
 }) => {
   const { pokemon, details } = pokemonWithDetails;
   const navigate = useNavigate();
-  const { isPokemonInPokedex, getPokemonData } = usePokedex();
+  const { isPokemonInPokedex, getPokemon } = usePokedex();
   const isCaught = isPokemonInPokedex(pokemon.name);
-  const pokemonData = getPokemonData(pokemon.name);
+  const pokemonData = getPokemon(pokemon.name);
 
   if (!details) {
     return (
-      <PokemonCardOffline
+      <CardOffline
         pokemon={pokemon}
         isSelected={isSelected}
         onToggleSelect={onToggleSelect}
@@ -49,7 +51,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
           id={`select-${pokemon.name}`}
           type="checkbox"
           checked={isSelected}
-          onChange={onToggleSelect}
+          onChange={() => onToggleSelect(pokemon.name)}
           aria-label={`Select ${pokemon.name}`}
           className="absolute top-2 left-2 w-5 h-5 cursor-pointer"
         />
@@ -117,6 +119,8 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
       </p>
     </div>
   );
-};
+});
 
-export { PokemonCard };
+Card.displayName = "Card";
+
+export { Card };

@@ -1,9 +1,11 @@
 import "./App.css";
+
 import { Route, Routes } from "react-router";
-import PokemonDetail from "./pages/PokemonDetail";
+
+import { Header } from "./components/Header";
 import HomePage from "./pages/HomePage";
 import Pokedex from "./pages/Pokedex";
-import { Header } from "./components/Header";
+import PokemonDetail from "./pages/PokemonDetail";
 
 function App() {
   return (

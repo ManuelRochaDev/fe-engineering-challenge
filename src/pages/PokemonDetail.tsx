@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+
+import { Button } from "../components/Button";
 import { StatBar } from "../components/StatBar";
-import { useFetchPokemonDetails } from "../hooks/useFetchPokemonDetails";
 import { TypeTag } from "../components/TypeTag";
 import { usePokedex } from "../contexts/PokedexContext";
-import { timestampToDate } from "../utils/timestamp-to-date";
-import { Button } from "../components/Button";
-import { getStatDisplayName } from "../utils/stat-mapper";
+import { useFetchPokemonDetails } from "../hooks/useFetchPokemonDetails";
 import { sharePokemon } from "../utils/share-pokemon";
+import { getStatDisplayName } from "../utils/stat-mapper";
+import { timestampToDate } from "../utils/timestamp-to-date";
 
 const PokemonDetail = () => {
   const { name } = useParams<{ name: string }>();
@@ -15,9 +16,9 @@ const PokemonDetail = () => {
   const { pokemonWithDetails, isLoading } = useFetchPokemonDetails({
     pokemonNames: name ? [name] : [],
   });
-  const { isPokemonInPokedex, getPokemonData, updatePokemonNote } =
+  const { isPokemonInPokedex, getPokemon, updatePokemonNote } =
     usePokedex();
-  const pokedexData = getPokemonData(name || "");
+  const pokedexData = getPokemon(name || "");
   const [note, setNote] = useState(pokedexData?.note || "");
   const [isEditingNote, setIsEditingNote] = useState(false);
 

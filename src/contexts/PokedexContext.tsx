@@ -1,11 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, {
   createContext,
+  type ReactNode,
+  useCallback,
   useContext,
-  useState,
   useEffect,
   useMemo,
-  type ReactNode,
+  useState,
 } from "react";
+
 import type { PokedexEntry } from "../services/pokedex-service";
 
 const POKEDEX_KEY = "pokedex";
@@ -16,7 +19,7 @@ interface PokedexContextType {
   removePokemon: (name: string) => void;
   isPokemonInPokedex: (name: string) => boolean;
   getPokedexCount: () => number;
-  getPokemonData: (name: string) => PokedexEntry | undefined;
+  getPokemon: (name: string) => PokedexEntry | undefined;
   updatePokemonNote: (name: string, note: string) => void;
 }
 
@@ -35,7 +38,7 @@ export const PokedexProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem(POKEDEX_KEY, JSON.stringify(pokedex));
   }, [pokedex]);
 
-  const addPokemon = (name: string, note?: string) => {
+  const addPokemon = useCallback((name: string, note?: string) => {
     setPokedex((prev) => {
       //check if pokemon already exists
       if (prev.some((entry) => entry.name === name)) {
@@ -50,40 +53,40 @@ export const PokedexProvider: React.FC<{ children: ReactNode }> = ({
 
       return [...prev, newEntry];
     });
-  };
+  }, []);
 
-  const removePokemon = (name: string) => {
+  const removePokemon = useCallback((name: string) => {
     setPokedex((prev) => prev.filter((entry) => entry.name !== name));
-  };
+  }, []);
 
-  const isPokemonInPokedex = (name: string): boolean => {
+  const isPokemonInPokedex = useCallback((name: string): boolean => {
     return pokedex.some((entry) => entry.name === name);
-  };
+  }, [pokedex]);
 
-  const getPokedexCount = (): number => {
+  const getPokedexCount = useCallback((): number => {
     return pokedex.length;
-  };
+  }, [pokedex]);
 
-  const getPokemonData = (name: string): PokedexEntry | undefined => {
+  const getPokemon = useCallback((name: string): PokedexEntry | undefined => {
     return pokedex.find((entry) => entry.name === name);
-  };
+  }, [pokedex]);
 
-  const updatePokemonNote = (name: string, note: string) => {
+  const updatePokemonNote = useCallback((name: string, note: string) => {
     setPokedex((prev) =>
       prev.map((entry) => (entry.name === name ? { ...entry, note } : entry)),
     );
-  };
+  }, []);
 
   return (
     <PokedexContext.Provider
       value={useMemo(
         () => ({
-          pokedex,
           addPokemon,
-          removePokemon,
-          isPokemonInPokedex,
           getPokedexCount,
-          getPokemonData,
+          getPokemon,
+          isPokemonInPokedex,
+          pokedex,
+          removePokemon,
           updatePokemonNote,
         }),
         [
@@ -92,7 +95,8 @@ export const PokedexProvider: React.FC<{ children: ReactNode }> = ({
           removePokemon,
           isPokemonInPokedex,
           getPokedexCount,
-          getPokemonData,
+          getPokemon,
+          updatePokemonNote,
         ],
       )}
     >

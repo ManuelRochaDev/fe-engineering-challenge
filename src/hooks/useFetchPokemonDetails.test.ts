@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useFetchPokemonDetails } from "./useFetchPokemonDetails";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { PokemonDetails } from "../interfaces/PokemonDetails";
 import * as pokeApiService from "../services/pokeapi-service";
+import { useFetchPokemonDetails } from "./useFetchPokemonDetails";
 
 vi.mock("../services/pokeapi-service");
 
@@ -11,7 +13,6 @@ describe("useFetchPokemonDetails", () => {
   });
 
   it("fetches pokemon list when no names are provided", async () => {
-    //mock API response
     vi.mocked(pokeApiService.getPokemons).mockResolvedValue({
       count: 1302,
       next: null,
@@ -30,7 +31,7 @@ describe("useFetchPokemonDetails", () => {
       sprites: { front_default: "url" },
       types: [],
       stats: [],
-    } as any);
+    } as PokemonDetails);
 
     const { result } = renderHook(() =>
       useFetchPokemonDetails({ limit: 2, offset: 0 }),
@@ -41,7 +42,6 @@ describe("useFetchPokemonDetails", () => {
     });
 
     expect(result.current.pokemonWithDetails).toHaveLength(2);
-    expect(result.current.totalCount).toBe(1302);
   });
 
   it("fetches specific pokemon when names are provided", async () => {
@@ -54,7 +54,7 @@ describe("useFetchPokemonDetails", () => {
         sprites: { front_default: "url" },
         types: [],
         stats: [],
-      } as any)
+      } as PokemonDetails)
       .mockResolvedValueOnce({
         id: 6,
         name: "charizard",
@@ -63,7 +63,7 @@ describe("useFetchPokemonDetails", () => {
         sprites: { front_default: "url" },
         types: [],
         stats: [],
-      } as any);
+      } as PokemonDetails);
 
     const { result } = renderHook(() =>
       useFetchPokemonDetails({ pokemonNames: ["pikachu", "charizard"] }),
@@ -115,7 +115,7 @@ describe("useFetchPokemonDetails", () => {
         sprites: { front_default: "url" },
         types: [],
         stats: [],
-      } as any)
+      } as PokemonDetails)
       .mockRejectedValueOnce(new Error("Failed to fetch ivysaur"));
 
     const { result } = renderHook(() =>

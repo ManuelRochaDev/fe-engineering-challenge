@@ -1,24 +1,24 @@
-import type { Pokemon } from "../../../interfaces/Pokemon";
-import { CatchButton } from "../../CatchButton";
 import { usePokedex } from "../../../contexts/PokedexContext";
+import type { Pokemon } from "../../../interfaces/Pokemon";
+import { sharePokemon } from "../../../utils/share-pokemon";
 import { timestampToDate } from "../../../utils/timestamp-to-date";
 import { Button } from "../../Button";
-import { sharePokemon } from "../../../utils/share-pokemon";
+import { CatchButton } from "../../CatchButton";
 
-interface PokemonCardOfflineProps {
+interface CardOfflineProps {
   pokemon: Pokemon;
   isSelected?: boolean;
-  onToggleSelect?: () => void;
+  onToggleSelect?: (name: string) => void;
 }
 
-const PokemonCardOffline: React.FC<PokemonCardOfflineProps> = ({
+const CardOffline: React.FC<CardOfflineProps> = ({
   pokemon,
   isSelected = false,
   onToggleSelect,
 }) => {
-  const { isPokemonInPokedex, getPokemonData } = usePokedex();
+  const { isPokemonInPokedex, getPokemon } = usePokedex();
   const isCaught = isPokemonInPokedex(pokemon.name);
-  const pokemonData = getPokemonData(pokemon.name);
+  const pokemonData = getPokemon(pokemon.name);
 
   return (
     <div
@@ -30,7 +30,7 @@ const PokemonCardOffline: React.FC<PokemonCardOfflineProps> = ({
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={onToggleSelect}
+          onChange={() => onToggleSelect(pokemon.name)}
           aria-label={`Select ${pokemon.name}`}
           className="absolute top-2 left-2 w-5 h-5 cursor-pointer"
         />
@@ -58,4 +58,4 @@ const PokemonCardOffline: React.FC<PokemonCardOfflineProps> = ({
   );
 };
 
-export { PokemonCardOffline };
+export { CardOffline };

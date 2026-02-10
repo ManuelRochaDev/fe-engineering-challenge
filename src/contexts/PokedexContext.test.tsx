@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { PokedexProvider, usePokedex } from "./PokedexContext";
+import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it } from "vitest";
+
+import { PokedexProvider, usePokedex } from "./PokedexContext";
 
 describe("PokedexContext", () => {
   beforeEach(() => {
@@ -41,7 +42,7 @@ describe("PokedexContext", () => {
       result.current.addPokemon("pikachu", "My favorite!");
     });
 
-    const pokemon = result.current.getPokemonData("pikachu");
+    const pokemon = result.current.getPokemon("pikachu");
     expect(pokemon?.note).toBe("My favorite!");
   });
 
@@ -64,7 +65,7 @@ describe("PokedexContext", () => {
       result.current.updatePokemonNote("pikachu", "Updated note");
     });
 
-    const pokemon = result.current.getPokemonData("pikachu");
+    const pokemon = result.current.getPokemon("pikachu");
     expect(pokemon?.note).toBe("Updated note");
   });
 

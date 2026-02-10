@@ -1,7 +1,7 @@
 import { usePokedex } from "../../../contexts/PokedexContext";
 import type { PokemonWithDetails } from "../../../interfaces/PokemonWithDetails";
-import { PokemonTableRowOffline } from "./TableRowOffline";
 import { PokemonTableRow } from "./TableRow";
+import { PokemonTableRowOffline } from "./TableRowOffline";
 
 interface PokemonTableProps {
   pokemons: PokemonWithDetails[];
@@ -16,7 +16,7 @@ const PokemonTable: React.FC<PokemonTableProps> = ({
   selectedPokemon,
   onToggleSelect,
 }) => {
-  const { isPokemonInPokedex, getPokemonData } = usePokedex();
+  const { isPokemonInPokedex, getPokemon } = usePokedex();
 
   return (
     <div className="overflow-x-auto">
@@ -35,7 +35,7 @@ const PokemonTable: React.FC<PokemonTableProps> = ({
         <tbody>
           {pokemons.map(({ pokemon, details }) => {
             const isCaught = isPokemonInPokedex(pokemon.name);
-            const pokemonData = getPokemonData(pokemon.name);
+            const pokemonData = getPokemon(pokemon.name);
 
             //offline mode
             if (!details) {

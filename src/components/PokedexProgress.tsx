@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
+
 import { usePokedex } from "../contexts/PokedexContext";
-import { useState, useEffect } from "react";
 import { getPokemons } from "../services/pokeapi-service";
 
-const Progress: React.FC = () => {
+const PokedexProgress: React.FC = () => {
   const { pokedex } = usePokedex();
   const [totalPokemon, setTotalPokemon] = useState(0);
 
@@ -29,4 +30,4 @@ const Progress: React.FC = () => {
   );
 };
 
-export { Progress };
+export { PokedexProgress };
